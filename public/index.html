@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="沿着时间，记录研究想法的提出、验证、转折与衍生。">
+  <meta name="color-scheme" content="light"><title>IdeaTree · 研究灵感时间轴</title>
+  <link rel="icon" href="/assets/ideatree-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css">
+  <script src="/vendor/d3.min.js" defer></script><script src="/vendor/lucide.min.js" defer></script>
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳转到时间轴</a>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar" aria-label="Idea 导航">
+    <button id="close-sidebar" class="icon-btn sidebar-close" aria-label="关闭分支列表"><i data-lucide="x"></i></button>
+    <a class="brand" href="/" aria-label="IdeaTree 首页"><img src="/assets/ideatree-icon.svg" width="34" height="34" alt=""><span>idea<span class="brand-light">tree</span><small>研究灵感工作台</small></span></a>
+    <div class="workspace-name"><i data-lucide="folder-open"></i><span id="space-name">我的研究</span><button id="rename-space" class="icon-btn" aria-label="修改空间名称"><i data-lucide="pencil"></i></button></div>
+    <div class="nav-heading"><span>IDEA 分支</span><span id="idea-count">0</span></div>
+    <div id="idea-list" class="idea-list"></div>
+    <div class="sidebar-footer">
+      <div class="backup-buttons"><button id="import" class="quiet-btn"><i data-lucide="upload"></i>导入备份</button><button id="export" class="quiet-btn"><i data-lucide="download"></i>导出备份</button></div>
+      <div id="save-state" role="status" aria-live="polite"><span class="save-dot"></span>保存在本机</div>
+    </div>
+  </aside>
+  <main id="main" class="main">
+    <header class="topbar"><div class="page-heading"><button id="toggle-sidebar" class="icon-btn mobile-menu" aria-label="打开分支列表" aria-expanded="false"><i data-lucide="panel-left"></i></button><div><div class="eyebrow">IDEA WORKSPACE</div><h1>生长时间轴</h1></div><span id="demo-badge" class="demo-badge" hidden>示例空间</span></div><button id="new-idea" class="btn primary"><i data-lucide="plus"></i><span>新建 idea</span></button></header>
+    <div id="demo-notice" class="demo-notice" hidden><span>从几个示例，看看想法如何生长与分岔。</span><button id="start-empty">开始我的记录<i data-lucide="arrow-up-right"></i></button></div>
+    <div class="workspace-body">
+      <section class="timeline-panel" aria-label="Idea 时间轴">
+        <div class="timeline-toolbar"><div class="period"><i data-lucide="calendar-days"></i><span id="period-label">时间范围</span></div><div class="timeline-actions"><button id="go-today" class="quiet-btn">今天</button><button id="fit" class="quiet-btn"><i data-lucide="scan"></i><span>适应全部</span></button><button id="toggle-detail" class="icon-btn" aria-label="显示或隐藏详情" aria-expanded="true"><i data-lucide="panel-right"></i></button></div></div>
+        <div id="chart-scroll" class="chart-scroll"><svg id="timeline" role="img" aria-label="按日期排列的 idea 分支与关键事件"></svg><div id="empty-state" class="empty-state" hidden><div class="empty-symbol"><i data-lucide="sprout"></i></div><h2>每个想法，都有一个起点</h2><p>记下第一个 idea，再慢慢补上它的经历。</p><button id="empty-create" class="btn primary"><i data-lucide="plus"></i>记录第一个 idea</button></div></div>
+        <div class="chart-footer"><div id="legend" class="legend"></div><div class="zoom-controls" title="Ctrl + 滚轮缩放整个页面；Shift + 滚轮缩放时间轴"><button id="pan-left" class="icon-btn" aria-label="查看更早的时间"><i data-lucide="chevron-left"></i></button><button id="zoom-out" class="icon-btn" aria-label="缩小时间轴"><i data-lucide="minus"></i></button><span id="zoom-level">100%</span><button id="zoom-in" class="icon-btn" aria-label="放大时间轴"><i data-lucide="plus"></i></button><button id="pan-right" class="icon-btn" aria-label="查看更晚的时间"><i data-lucide="chevron-right"></i></button></div></div>
+        <div class="chart-hint">拖动画布平移 · Ctrl + 滚轮缩放页面 · Shift + 滚轮缩放时间轴 · 点击事件查看记录</div>
+      </section>
+      <aside id="detail-panel" class="detail-panel" aria-label="Idea 详情"></aside>
+    </div>
+  </main>
+</div>
+<dialog id="editor" aria-labelledby="editor-title"><form id="editor-form"><div class="dialog-heading"><div><div id="editor-kicker" class="eyebrow">IDEA</div><h2 id="editor-title">新建 idea</h2></div><button type="button" class="icon-btn" data-close aria-label="关闭编辑窗口"><i data-lucide="x"></i></button></div><div id="editor-fields" class="editor-fields"></div><p id="form-error" class="form-error" role="alert" hidden></p><div class="dialog-footer"><button type="button" class="btn" data-close>取消</button><button type="submit" class="btn primary" id="editor-submit">保存</button></div></form></dialog>
+<dialog id="confirm" aria-labelledby="confirm-title"><form method="dialog"><div class="dialog-heading"><h2 id="confirm-title">确认操作</h2><button class="icon-btn" value="cancel" aria-label="关闭确认窗口"><i data-lucide="x"></i></button></div><p id="confirm-text"></p><div class="dialog-footer"><button class="btn" value="cancel">取消</button><button id="confirm-ok" class="btn danger" value="yes">确认</button></div></form></dialog>
+<input id="import-file" type="file" accept=".json,application/json" hidden>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<div id="load-error" class="load-error" hidden><h2>暂时无法打开记录</h2><p id="load-error-message"></p><button id="retry-load" class="btn primary">重新加载</button></div>
+</body></html>
