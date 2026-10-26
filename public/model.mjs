@@ -2,6 +2,7 @@ export const STATES = {
   pending: { label: '待评估', color: '#778194' },
   active: { label: '推进中', color: '#22776c' },
   paused: { label: '暂停', color: '#9b6d21' },
+  split: { label: '已拆分', color: '#526f93' },
   stopped: { label: '中止', color: '#b35862' },
   completed: { label: '已完成', color: '#5b6ab0' },
 };
@@ -16,6 +17,9 @@ export const id = () => crypto.randomUUID();
 export const orderedEvents = idea => [...idea.events].sort((a, b) => a.date.localeCompare(b.date) || a.order - b.order);
 export function statusAt(idea, date = '9999-12-31') {
   return orderedEvents(idea).filter(e => e.date <= date && e.status).reduce((s, e) => e.status, idea.initialStatus);
+}
+export function ideaEndDate(idea, now = today()) {
+  return ['stopped','completed','split'].includes(statusAt(idea)) ? orderedEvents(idea).filter(event => event.status).at(-1)?.date || idea.created : now;
 }
 export function descendants(ideas, root) {
   const found = new Set([root]);
@@ -35,6 +39,29 @@ export function treeRows(ideas, collapsed = new Set()) {
   }
   visit(null, 0);
   return rows;
+}
+function reconcileSplitIdeas(ideas) {
+  const visited = new Set(), stoppedTrees = new Map(), latestDates = new Map();
+  const reconcile = idea => {
+    if (visited.has(idea.id)) return;
+    const children = ideas.filter(child => child.parentId === idea.id);
+    children.forEach(reconcile);
+    visited.add(idea.id);
+    const state = statusAt(idea), last = orderedEvents(idea).filter(event => event.status).at(-1);
+    const date = [last?.date || idea.created, ...children.map(child => latestDates.get(child.id))].sort().at(-1);
+    latestDates.set(idea.id,date);
+    const autoKey = idea.id.slice(0,64);
+    const automaticallyStopped = state === 'stopped' && last?.id.startsWith(`auto-stop-${autoKey}-`);
+    const allStopped = children.length > 0 && children.every(child => stoppedTrees.get(child.id));
+    const next = state === 'split' && allStopped ? 'stopped' : automaticallyStopped && children.length && !allStopped ? 'split' : null;
+    stoppedTrees.set(idea.id,(next || state) === 'stopped' && children.every(child => stoppedTrees.get(child.id)));
+    if (!next) return;
+    const prefix = `${next === 'stopped' ? 'auto-stop' : 'auto-split'}-${autoKey}-`;
+    let serial = 1;
+    while (ideas.some(item => item.events.some(event => event.id === prefix + serial))) serial++;
+    idea.events.push({ id: prefix + serial, date, kind: '状态变更', title: next === 'stopped' ? '全部承接分支已中止，自动归档' : '承接分支恢复，回到已拆分', note: next === 'stopped' ? '所有直接承接的子方向均已中止，原拆分方向随之中止并归档。' : '已有承接分支恢复发展，撤回自动归档；原方向仍由子方向承接。', next: '', link: '', status: next, order: Math.max(0, ...idea.events.map(event => event.order)) + 1 });
+  };
+  ideas.forEach(reconcile);
 }
 export function validateDocument(input) {
   const fail = message => { throw new Error(message); };
@@ -78,6 +105,7 @@ export function validateDocument(input) {
   });
   const map = new Map(ideas.map(i => [i.id, i]));
   for (const idea of ideas) {
+    if (statusAt(idea) === 'split' && !ideas.some(child => child.parentId === idea.id)) fail('标记“已拆分”前，请先创建承接工作的子 idea。');
     if (idea.parentId) {
       const parent = map.get(idea.parentId);
       if (!parent || parent.id === idea.id) fail('来源 idea 不存在或指向自身。');
@@ -87,6 +115,7 @@ export function validateDocument(input) {
       while (p) { if (seen.has(p.id)) fail('衍生关系不能构成循环。'); seen.add(p.id); p = map.get(p.parentId); }
     } else if (idea.parentEventId) fail('独立 idea 不应设置来源事件。');
   }
+  reconcileSplitIdeas(ideas);
   return { version: 1, name: string(input.name ?? '我的研究', '空间名称', 60, true), demo: input.demo === true, ideas };
 }
 export function makeDemo() {

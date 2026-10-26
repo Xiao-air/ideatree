@@ -2,7 +2,10 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import { validateDocument, makeDemo } from './public/model.mjs';
+import { createRadarApi } from './radar-api.mjs';
+import { createScheduleApi } from './schedule-api.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const publicRoot = path.join(root, 'public');
@@ -11,7 +14,16 @@ const port = Number(process.env.PORT || 4317);
 const file = path.join(dataRoot, 'ideatree.json');
 await fs.mkdir(dataRoot, { recursive: true });
 let state;
-try { const stored = JSON.parse(await fs.readFile(file, 'utf8')); state = { ...validateDocument(stored), revision: Number(stored.revision) || 0 }; }
+try {
+  const stored = JSON.parse(await fs.readFile(file, 'utf8')); state = { ...validateDocument(stored), revision: Number(stored.revision) || 0 };
+  if (!isDeepStrictEqual(state.ideas, stored.ideas)) {
+    await fs.mkdir(path.join(dataRoot, 'backups'), { recursive: true });
+    await fs.copyFile(file, path.join(dataRoot, 'backups', `revision-${state.revision}.json`));
+    state.revision++;
+    await fs.writeFile(`${file}.tmp`, JSON.stringify(state, null, 2), 'utf8');
+    await fs.rename(`${file}.tmp`, file);
+  }
+}
 catch (error) {
   if (error.code !== 'ENOENT') { console.error('无法读取已有数据。为保护记录，服务未启动：', error.message); process.exit(1); }
   state = { ...makeDemo(), revision: 0 };
@@ -20,6 +32,13 @@ catch (error) {
 let queue = Promise.resolve();
 const send = (res, code, data) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(data)); };
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json' };
+let radarSourceRoot = process.env.IDEATREE_RADAR_SOURCE_ROOT;
+if (!radarSourceRoot) {
+  try { radarSourceRoot = (await fs.readFile(path.join(dataRoot, 'radar-source-root.txt'), 'utf8')).trim(); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+}
+const radarApi = await createRadarApi({ dataRoot, sourceRoot: radarSourceRoot || path.join(dataRoot, 'radar-sources'), send });
+const scheduleApi = await createScheduleApi({ dataRoot, send });
 const server = http.createServer(async (req, res) => {
   try {
     const expectedHost = `127.0.0.1:${port}`;
@@ -27,6 +46,8 @@ const server = http.createServer(async (req, res) => {
     if (req.headers.origin && ![`http://${expectedHost}`, `http://localhost:${port}`].includes(req.headers.origin)) return send(res, 403, { error: '不接受外部网页的请求。' });
     const url = new URL(req.url, `http://${expectedHost}`);
     if (url.pathname === '/api/health') return send(res, 200, { app: 'ideatree' });
+    if (await radarApi(req, res, url)) return;
+    if (await scheduleApi(req, res, url)) return;
     if (url.pathname === '/api/data') {
       if (req.method === 'GET') return send(res, 200, state);
       if (req.method !== 'PUT' || !req.headers['content-type']?.startsWith('application/json')) return send(res, 405, { error: '不支持此请求。' });

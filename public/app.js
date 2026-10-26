@@ -1,4 +1,4 @@
-import { STATES, KINDS, PALETTE, today, dateValue, id, orderedEvents, statusAt, treeRows, descendants, validateDocument } from './model.mjs';
+import { STATES, KINDS, PALETTE, today, dateValue, id, orderedEvents, statusAt, ideaEndDate, treeRows, descendants, validateDocument } from './model.mjs';
 import { familySides, fitVertical, packLanes } from './layout.mjs';
 
 const $ = selector => document.querySelector(selector);
@@ -7,7 +7,7 @@ const icon = name => `<i data-lucide="${name}" aria-hidden="true"></i>`;
 const icons = () => window.lucide?.createIcons({ attrs: { 'aria-hidden': 'true' } });
 const shortDate = s => `${Number(s.slice(5,7))}月${Number(s.slice(8,10))}日`;
 const fullDate = s => `${s.slice(0,4)} 年 ${Number(s.slice(5,7))} 月 ${Number(s.slice(8,10))} 日`;
-const symbols = { pending:'○', active:'↗', paused:'Ⅱ', stopped:'×', completed:'✓' };
+const symbols = { pending:'○', active:'↗', paused:'Ⅱ', split:'⑂', stopped:'×', completed:'✓' };
 let doc, revision = 0, selected = null, selectedEvent = null, collapsed = new Set(), formMode = null;
 let saveQueue = Promise.resolve(), pendingSaves = 0, saveBlocked = false, toastTimer;
 let chartWidth = 900, transform = d3.zoomIdentity, baseScale, rows = [], detailOpen = innerWidth > 1000;
@@ -68,7 +68,8 @@ function renderNavigation() {
     return `<div class="idea-nav-group" data-state="${state}">${visit(null,0)}</div>`;
   }
   const archived = doc.ideas.filter(idea => states.get(idea.id) === 'stopped').length;
-  $('#idea-list').innerHTML = doc.ideas.length ? `<div class="ongoing-ideas">${['active','pending','paused','completed'].map(group).join('')}</div>${archived?`<section class="archive-folder"><button class="archive-toggle ${states.get(selected)==='stopped'?'contains-selected':''}" data-action="toggle-archive" aria-expanded="${archiveOpen}" aria-controls="archived-ideas">${icon(archiveOpen?'folder-open':'folder')}<span>已归档</span><span class="archive-count">${archived}</span>${icon(archiveOpen?'chevron-down':'chevron-right')}</button><div id="archived-ideas" ${archiveOpen?'':'hidden'}>${group('stopped')}</div></section>`:''}` : '<p class="sidebar-empty">还没有 idea，先记录一个想法。</p>';
+  const splitCount = doc.ideas.filter(idea => states.get(idea.id) === 'split').length;
+  $('#idea-list').innerHTML = doc.ideas.length ? `<div class="ongoing-ideas">${['active','pending','paused','completed'].map(group).join('')}</div>${splitCount?`<section class="split-directions" aria-label="已拆分方向"><div class="split-heading" title="原方向不再独立推进，由子方向承接">${icon('git-fork')}<span>已拆分</span><span class="split-count">${splitCount}</span></div>${group('split')}</section>`:''}${archived?`<section class="archive-folder"><button class="archive-toggle ${states.get(selected)==='stopped'?'contains-selected':''}" data-action="toggle-archive" aria-expanded="${archiveOpen}" aria-controls="archived-ideas">${icon(archiveOpen?'folder-open':'folder')}<span>已归档</span><span class="archive-count">${archived}</span>${icon(archiveOpen?'chevron-down':'chevron-right')}</button><div id="archived-ideas" ${archiveOpen?'':'hidden'}>${group('stopped')}</div></section>`:''}` : '<p class="sidebar-empty">还没有 idea，先记录一个想法。</p>';
 }
 function selectIdea(ideaId, eventId = null) {
   selected = ideaId; selectedEvent = eventId; detailOpen = true;
@@ -86,7 +87,7 @@ function renderDetail() {
   const events = orderedEvents(idea).reverse(); const next = events.find(e => e.next)?.next;
   panel.innerHTML = `<div class="detail-top"><span class="eyebrow">IDEA / ${String(doc.ideas.indexOf(idea)+1).padStart(2,'0')}</span><div><button class="icon-btn" data-action="edit-idea" aria-label="编辑 idea">${icon('pencil')}</button><button class="icon-btn" data-action="close-detail" aria-label="关闭详情">${icon('x')}</button></div></div>
     <div class="detail-intro">${badge(status,true)}<h2>${escape(idea.name)}</h2><p class="detail-summary">${escape(idea.summary || '还没有补充核心问题。')}</p>
-    <dl class="idea-meta"><dt>首次提出</dt><dd>${fullDate(idea.created)}</dd><dt>想法来源</dt><dd>${parent?`<button class="parent-link" data-select="${escape(parent.id)}">↳ ${escape(parent.name)}</button>`:'独立提出'}</dd></dl>
+    <dl class="idea-meta"><dt>首次提出</dt><dd>${fullDate(idea.created)}</dd><dt>想法来源</dt><dd>${parent?`<button class="parent-link" data-select="${escape(parent.id)}">↳ ${escape(parent.name)}</button>`:'独立提出'}</dd>${status==='split'?'<dt>方向去向</dt><dd>由子方向承接</dd>':''}</dl>
     <div class="detail-buttons"><button class="btn primary" data-action="add-event">${icon('plus')}记录事件</button><button class="btn" data-action="branch">${icon('git-branch')}衍生 idea</button></div>
     ${next?`<div class="next-step"><strong>${icon('corner-down-right')}下一步 / 恢复条件</strong><p>${escape(next)}</p></div>`:''}</div>
     <section class="history"><div class="history-heading"><h3>发展记录</h3><span>${events.length + 1} 个节点</span></div>
@@ -99,8 +100,8 @@ function measureText(value,size=14,weight=600) {
   return textMeasure.measureText(value).width;
 }
 function branchGeometry(idea,x,turnWidth=18,clip=true) {
-  const start=x(dateValue(idea.created)),ordered=orderedEvents(idea),state=statusAt(idea);
-  const endDate=['stopped','completed'].includes(state)?ordered.filter(event=>event.status).at(-1)?.date||idea.created:today();
+  const start=x(dateValue(idea.created)),ordered=orderedEvents(idea);
+  const endDate=ideaEndDate(idea);
   const end=x(dateValue(endDate)),bend=Math.min(turnWidth,Math.max(0,end-start));
   const titleStart=start+Math.min(bend,8)+6,titleX=clip?Math.max(24,titleStart):titleStart;
   let title=idea.name;
@@ -198,12 +199,11 @@ function drawChart() {
   const connectors = svg.append('g').attr('aria-hidden','true');
   for(const {idea} of rows) {
     const start=x(dateValue(idea.created)),y=yMap.get(idea.id),py=yMap.get(idea.parentId)??axisY;
-    const status=statusAt(idea),last=orderedEvents(idea).filter(e=>e.status).at(-1);
-    const end=x(dateValue(['stopped','completed'].includes(status)?last?.date||idea.created:today()));
+    const end=x(dateValue(ideaEndDate(idea)));
     const routeWidth=chartLayout.turnWidths.get(idea.id),bend=Math.min(routeWidth,Math.max(0,end-start)),turn=routeWidth*.55;
     const parent=doc.ideas.find(i=>i.id===idea.parentId);
-    if(parent&&['stopped','completed'].includes(statusAt(parent))) {
-      const parentEnd=orderedEvents(parent).filter(e=>e.status).at(-1)?.date||parent.created;
+    if(parent) {
+      const parentEnd=ideaEndDate(parent);
       if(parentEnd<idea.created) connectors.append('line').attr('x1',x(dateValue(parentEnd))).attr('x2',start).attr('y1',py).attr('y2',py).attr('stroke',idea.color).attr('stroke-width',1).attr('stroke-dasharray','2 5').attr('opacity',.45).append('title').text('衍生关联，原 idea 的状态不变');
     }
     connectors.append('path').attr('d',`M ${start} ${py} C ${start+turn} ${py} ${start+turn} ${y} ${start+bend} ${y}`).attr('class','branch-path').attr('stroke',idea.color).attr('stroke-width',1.7).attr('opacity',idea.parentId?.65:.32);
@@ -212,8 +212,7 @@ function drawChart() {
     const y = yMap.get(idea.id), parentY = yMap.get(idea.parentId) ?? axisY;
     const start = x(dateValue(idea.created)), state = statusAt(idea), focus = idea.id === selected;
     const ordered = orderedEvents(idea);
-    const endEvent = [...ordered].reverse().find(e=>e.status);
-    const endDate = ['stopped','completed'].includes(state) ? (endEvent?.date || idea.created) : today();
+    const endDate = ideaEndDate(idea);
     const end = x(dateValue(endDate)), bend = Math.min(chartLayout.turnWidths.get(idea.id),Math.max(0,end-start));
     const geometry=branchGeometry(idea,x,chartLayout.turnWidths.get(idea.id));
     if (focus) svg.append('rect').attr('x',Math.max(0,geometry.left-8)).attr('y',y-35).attr('width',Math.max(0,Math.min(chartWidth,geometry.right+8)-Math.max(0,geometry.left-8))).attr('height',Math.min(74,chartLayout.gap-6)).attr('fill',idea.color).attr('opacity',.035);
@@ -224,10 +223,10 @@ function drawChart() {
     branch.append('path').attr('d',`M ${start+bend} ${y} H ${Math.max(start+bend,end)}`).attr('stroke',idea.color).attr('stroke-width',focus?2.7:2).attr('opacity',state==='stopped'?.5:.85).attr('class','branch-path');
     branch.append('path').attr('d',`M ${start+bend} ${y} H ${Math.max(start+bend,end)}`).attr('stroke','transparent').attr('stroke-width',26).attr('fill','none');
     branch.append('circle').attr('cx',start).attr('cy',parentY).attr('r',3.8).attr('fill','#fff').attr('stroke',idea.color).attr('stroke-width',1.7);
-    // State intervals use line style; branch identity keeps one stable color.
+    // Stopped and split branches stay solid; other branches retain historical state intervals.
     const states = [{date:idea.created,status:idea.initialStatus},...ordered.filter(e=>e.status)];
     states.forEach((s,index)=>{
-      if(!['paused','pending','stopped','completed'].includes(s.status)) return;
+      if(['stopped','split'].includes(state)||!['paused','pending','stopped','completed'].includes(s.status)) return;
       const a = Math.max(start+bend,x(dateValue(s.date))), b = x(dateValue(states[index+1]?.date || endDate));
       if(b <= a) return;
       g.append('line').attr('x1',a).attr('x2',b).attr('y1',y).attr('y2',y).attr('stroke','#fff').attr('stroke-width',4).attr('pointer-events','none');

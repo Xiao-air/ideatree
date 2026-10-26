@@ -1,0 +1,281 @@
+{
+  "version": 1,
+  "catalogId": "synthetic-radar-v1",
+  "name": "虚构Radar测试库",
+  "snapshotAt": "2026-01-01T00:00:00+08:00",
+  "overview": "软件测试专用的虚构数据。",
+  "categories": [
+    {
+      "id": "SAMPLE-A",
+      "name": "示例分类1",
+      "description": "完全虚构的界面测试数据。",
+      "boundary": "仅软件测试。"
+    },
+    {
+      "id": "SAMPLE-B",
+      "name": "示例分类2",
+      "description": "完全虚构的界面测试数据。",
+      "boundary": "仅软件测试。"
+    }
+  ],
+  "families": [
+    {
+      "id": "F-A",
+      "categoryId": "SAMPLE-A",
+      "lineageKey": "F-A",
+      "name": "示例问题家族1",
+      "coreQuestion": "如何验证示例测量的可靠性？",
+      "reviewNote": "虚构测试记录。"
+    },
+    {
+      "id": "F-B",
+      "categoryId": "SAMPLE-A",
+      "lineageKey": "F-B",
+      "name": "示例问题家族2",
+      "coreQuestion": "如何验证示例测量的可靠性？",
+      "reviewNote": "虚构测试记录。"
+    },
+    {
+      "id": "F-C",
+      "categoryId": "SAMPLE-B",
+      "lineageKey": "F-C",
+      "name": "示例问题家族3",
+      "coreQuestion": "如何验证示例测量的可靠性？",
+      "reviewNote": "虚构测试记录。"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "P-A@V1",
+      "familyId": "F-A",
+      "name": "示例命题1",
+      "question": "如何区分两个虚构条件下的测量变化？",
+      "plainOverview": "这是用于验证分类、版本和来源追溯的虚构命题，不包含真实课题、研究记录或实验数据。",
+      "tags": {
+        "scientificProblemType": [
+          "归因"
+        ],
+        "acousticRole": [
+          "calibration"
+        ],
+        "keywords": [
+          "版本对照"
+        ]
+      },
+      "progress": {
+        "stage": "有界Deep Dive完成（通过Gate）",
+        "sourceRecommendation": "示例推荐",
+        "assessment": "示例评审",
+        "evidenceCorrection": "无",
+        "userDecision": "待定",
+        "mentorDiscussion": "未找到讨论记录",
+        "discussionMaterials": "示例材料",
+        "mentorReady": "False",
+        "lastProcessed": "2026-01-01",
+        "owner": "示例用户",
+        "reviewNote": "虚构记录。"
+      },
+      "evidence": {
+        "primaryRead": "示例全文",
+        "abstractOnly": "无",
+        "gaps": "等待独立验证。",
+        "scope": "仅软件测试。"
+      },
+      "indirectHistoryOnly": false,
+      "sources": [
+        {
+          "path": "notes/example-0.md",
+          "locator": "示例段落",
+          "kind": "synthetic",
+          "version": "1",
+          "recordedDate": "2026-01-01",
+          "agent": "test"
+        }
+      ]
+    },
+    {
+      "id": "P-A@V2",
+      "familyId": "F-A",
+      "name": "示例命题2",
+      "question": "如何区分两个虚构条件下的测量变化？",
+      "plainOverview": "这是用于验证分类、版本和来源追溯的虚构命题，不包含真实课题、研究记录或实验数据。",
+      "tags": {
+        "scientificProblemType": [
+          "归因"
+        ],
+        "acousticRole": [
+          "未说明"
+        ],
+        "keywords": [
+          "版本对照"
+        ]
+      },
+      "progress": {
+        "stage": "有界Deep Dive完成（通过Gate）",
+        "sourceRecommendation": "示例推荐",
+        "assessment": "示例评审",
+        "evidenceCorrection": "无",
+        "userDecision": "待定",
+        "mentorDiscussion": "未找到讨论记录",
+        "discussionMaterials": "示例材料",
+        "mentorReady": "True",
+        "lastProcessed": "2026-01-01",
+        "owner": "示例用户",
+        "reviewNote": "虚构记录。"
+      },
+      "evidence": {
+        "primaryRead": "示例全文",
+        "abstractOnly": "无",
+        "gaps": "等待独立验证。",
+        "scope": "仅软件测试。"
+      },
+      "indirectHistoryOnly": false,
+      "sources": [
+        {
+          "path": "notes/example-1.md",
+          "locator": "示例段落",
+          "kind": "synthetic",
+          "version": "1",
+          "recordedDate": "2026-01-01",
+          "agent": "test"
+        }
+      ]
+    },
+    {
+      "id": "P-B",
+      "familyId": "F-B",
+      "name": "示例命题3",
+      "question": "如何区分两个虚构条件下的测量变化？",
+      "plainOverview": "这是用于验证分类、版本和来源追溯的虚构命题，不包含真实课题、研究记录或实验数据。",
+      "tags": {
+        "scientificProblemType": [
+          "归因"
+        ],
+        "acousticRole": [
+          "未说明"
+        ],
+        "keywords": [
+          "样本"
+        ]
+      },
+      "progress": {
+        "stage": "待评估",
+        "sourceRecommendation": "示例推荐",
+        "assessment": "示例评审",
+        "evidenceCorrection": "无",
+        "userDecision": "待定",
+        "mentorDiscussion": "未找到讨论记录",
+        "discussionMaterials": "示例材料",
+        "mentorReady": "False",
+        "lastProcessed": "2026-01-01",
+        "owner": "示例用户",
+        "reviewNote": "虚构记录。"
+      },
+      "evidence": {
+        "primaryRead": "示例全文",
+        "abstractOnly": "无",
+        "gaps": "等待独立验证。",
+        "scope": "仅软件测试。"
+      },
+      "indirectHistoryOnly": false,
+      "sources": [
+        {
+          "path": "notes/example-2.md",
+          "locator": "示例段落",
+          "kind": "synthetic",
+          "version": "1",
+          "recordedDate": "2026-01-01",
+          "agent": "test"
+        }
+      ]
+    },
+    {
+      "id": "P-C",
+      "familyId": "F-C",
+      "name": "示例命题4",
+      "question": "如何区分两个虚构条件下的测量变化？",
+      "plainOverview": "这是用于验证分类、版本和来源追溯的虚构命题，不包含真实课题、研究记录或实验数据。",
+      "tags": {
+        "scientificProblemType": [
+          "归因"
+        ],
+        "acousticRole": [
+          "未说明"
+        ],
+        "keywords": [
+          "样本"
+        ]
+      },
+      "progress": {
+        "stage": "待评估",
+        "sourceRecommendation": "示例推荐",
+        "assessment": "示例评审",
+        "evidenceCorrection": "无",
+        "userDecision": "待定",
+        "mentorDiscussion": "未找到讨论记录",
+        "discussionMaterials": "示例材料",
+        "mentorReady": "False",
+        "lastProcessed": "2026-01-01",
+        "owner": "示例用户",
+        "reviewNote": "虚构记录。"
+      },
+      "evidence": {
+        "primaryRead": "示例全文",
+        "abstractOnly": "无",
+        "gaps": "等待独立验证。",
+        "scope": "仅软件测试。"
+      },
+      "indirectHistoryOnly": true,
+      "sources": [
+        {
+          "path": "notes/example-3.md",
+          "locator": "示例段落",
+          "kind": "synthetic",
+          "version": "1",
+          "recordedDate": "2026-01-01",
+          "agent": "test"
+        }
+      ]
+    }
+  ],
+  "pending": [
+    {
+      "id": "P-PENDING",
+      "status": "待核对",
+      "reason": "虚构的来源冲突。",
+      "source": {
+        "path": "notes/pending.md",
+        "locator": "示例段落",
+        "kind": "synthetic",
+        "version": "1",
+        "recordedDate": "2026-01-01",
+        "agent": "test"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "from": "P-A@V1",
+      "to": "P-A@V2",
+      "type": "variant",
+      "note": "同一家族的两个虚构版本。"
+    }
+  ],
+  "metadata": {
+    "sourceSnapshotSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "classificationDecision": "测试分类",
+    "scientificStatusPolicy": "各状态层独立。",
+    "phase1Status": "测试",
+    "excludedScopeCount": 1,
+    "reports": [
+      {
+        "path": "notes/report.md",
+        "locator": "示例段落",
+        "kind": "synthetic",
+        "version": "1",
+        "recordedDate": "2026-01-01",
+        "agent": "test"
+      }
+    ]
+  }
+}

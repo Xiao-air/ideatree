@@ -1,6 +1,6 @@
 {
   "name": "ideatree",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "A local workspace for the evolution of research ideas",

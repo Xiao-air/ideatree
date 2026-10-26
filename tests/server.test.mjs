@@ -29,7 +29,13 @@ test('local API persists data, rejects conflicts and malformed imports, and keep
     assert.equal((await fetch(`${base}/data/ideatree.json`)).status,404);
     assert.equal((await readdir(path.join(dataDir,'backups'))).length,1);
     const backup=JSON.parse(await readFile(path.join(dataDir,'backups','revision-0.json'),'utf8'));assert.equal(backup.name,initial.name);
-    await stop();await launch();assert.equal((await fetch(`${base}/api/data`).then(r=>r.json())).name,'测试空间');
+    const splitDoc=structuredClone(fetched);splitDoc.ideas.find(i=>i.id==='notes').events.at(-1).status='split';
+    const splitSave=await put(splitDoc);assert.equal(splitSave.status,200);assert.equal((await splitSave.json()).revision,2);
+    const invalidSplit=structuredClone(splitDoc);invalidSplit.revision=2;invalidSplit.ideas.find(i=>i.id==='weekly').events.at(-1).status='split';
+    assert.equal((await put(invalidSplit)).status,400);
+    await stop();await launch();const reopened=await fetch(`${base}/api/data`).then(r=>r.json());
+    assert.equal(reopened.name,'测试空间');assert.equal(reopened.ideas.find(i=>i.id==='notes').events.at(-1).status,'split');
+    assert.equal(reopened.ideas.find(i=>i.id==='failures').initialStatus,'pending');
     await stop();await writeFile(path.join(dataDir,'ideatree.json'),'{broken');
     await assert.rejects(launch());assert.equal(await readFile(path.join(dataDir,'ideatree.json'),'utf8'),'{broken');
   } finally {await stop();await rm(dataDir,{recursive:true,force:true});}

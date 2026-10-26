@@ -5,6 +5,7 @@
   <meta name="description" content="沿着时间，记录研究想法的提出、验证、转折与衍生。">
   <meta name="color-scheme" content="light"><title>IdeaTree · 研究灵感时间轴</title>
   <link rel="icon" href="/assets/ideatree-icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/workspace-tabs.css">
   <script src="/vendor/d3.min.js" defer></script><script src="/vendor/lucide.min.js" defer></script>
   <script src="/app.js" type="module"></script>
 </head>
@@ -14,6 +15,7 @@
   <aside class="sidebar" id="sidebar" aria-label="Idea 导航">
     <button id="close-sidebar" class="icon-btn sidebar-close" aria-label="关闭分支列表"><i data-lucide="x"></i></button>
     <a class="brand" href="/" aria-label="IdeaTree 首页"><img src="/assets/ideatree-icon.svg" width="34" height="34" alt=""><span>idea<span class="brand-light">tree</span><small>研究灵感工作台</small></span></a>
+    <nav class="workspace-tabs" aria-label="工作页面"><a href="/" aria-current="page">生长时间轴</a><a href="/radar.html">Radar备选库</a><a href="/schedule.html">周实验安排</a></nav>
     <div class="workspace-name"><i data-lucide="folder-open"></i><span id="space-name">我的研究</span><button id="rename-space" class="icon-btn" aria-label="修改空间名称"><i data-lucide="pencil"></i></button></div>
     <div class="nav-heading"><span>IDEA 分支</span><span id="idea-count">0</span></div>
     <div id="idea-list" class="idea-list"></div>

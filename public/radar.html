@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light"><title>IdeaTree · Radar备选库</title>
+  <link rel="icon" href="/assets/ideatree-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/workspace-tabs.css"><link rel="stylesheet" href="/radar.css">
+  <script src="/radar.js" type="module"></script>
+</head>
+<body>
+<a class="skip-link" href="#radar-main">跳转到Radar备选库</a>
+<div class="radar-shell">
+  <aside class="radar-sidebar" aria-label="Radar分类">
+    <a class="brand" href="/" aria-label="IdeaTree 首页"><img src="/assets/ideatree-icon.svg" width="34" height="34" alt=""><span>idea<span class="brand-light">tree</span><small>研究灵感工作台</small></span></a>
+    <nav class="workspace-tabs" aria-label="工作页面"><a href="/">生长时间轴</a><a href="/radar.html" aria-current="page">Radar备选库</a><a href="/schedule.html">周实验安排</a></nav>
+    <div class="radar-nav-heading">按科学问题浏览 <span>家族 / 命题</span></div>
+    <nav id="radar-categories" class="radar-categories" aria-label="问题方向"></nav>
+    <div class="radar-sidebar-bottom"><button id="radar-pending" class="radar-category">待核对 <span id="pending-count">0</span></button><p>状态冲突项单列，不计入备选命题。</p><div class="backup-buttons"><button id="radar-import" class="quiet-btn">导入Radar</button><button id="radar-export" class="quiet-btn" disabled>导出Radar</button></div></div>
+  </aside>
+  <main id="radar-main" class="radar-main">
+    <header class="radar-header"><div><div class="eyebrow">IDEA WORKSPACE · RADAR</div><h1>Radar备选库</h1><p id="radar-totals">正在读取本机记录…</p></div><div class="radar-header-actions"><button id="radar-about" class="quiet-btn">收录说明</button><a href="/" class="btn">返回时间轴</a></div></header>
+    <section id="radar-filters" class="radar-filters" aria-label="筛选命题">
+      <label class="radar-search">搜索问题、名称或编号<input id="radar-search" type="search" placeholder="例如：酶、液晶、复位、R18、历史引述" autocomplete="off"></label>
+      <label>已有阶段<select id="radar-stage"><option value="">全部阶段</option></select></label>
+      <div class="radar-secondary-filters"><label>科学问题类型<select id="radar-problem"><option value="">全部类型</option></select></label><label>声学作用方式<select id="radar-acoustic"><option value="">全部作用方式</option><option value="actuation">施加作用 · Actuation</option><option value="interrogation">状态询问 · Interrogation</option><option value="calibration">剂量标定 · Calibration</option><option value="unknown">尚未说明</option></select></label><label>关键词<select id="radar-keyword"><option value="">全部关键词</option></select></label><button id="radar-reset" class="quiet-btn">清除筛选</button></div>
+    </section>
+    <div id="radar-message" class="radar-message" role="status" aria-live="polite" hidden></div>
+    <div class="radar-body"><section class="radar-results" aria-label="问题家族和命题"><div class="radar-results-heading"><div><h2 id="radar-direction">全部方向</h2><span id="radar-result-count"></span></div><button id="radar-expand" class="quiet-btn">展开家族</button></div><div id="radar-family-list" class="radar-family-list"></div></section><aside id="radar-detail" class="radar-detail" aria-label="命题详情" tabindex="-1"><p class="radar-detail-placeholder">选择一个命题，查看问题、已有状态与证据。</p></aside></div>
+  </main>
+</div>
+<input id="radar-import-file" type="file" accept=".json,application/json" hidden>
+<dialog id="radar-import-dialog" aria-labelledby="radar-import-title"><div class="dialog-heading"><h2 id="radar-import-title">导入Radar快照</h2><button id="radar-import-close" class="icon-btn" aria-label="关闭导入预览">×</button></div><div id="radar-import-preview" class="radar-dialog-content"></div><div class="dialog-footer"><button id="radar-import-cancel" class="btn">取消</button><button id="radar-import-confirm" class="btn primary">导入这份快照</button></div></dialog>
+<dialog id="radar-about-dialog" aria-labelledby="radar-about-title"><div class="dialog-heading"><h2 id="radar-about-title">这份备选库收录了什么</h2><button id="radar-about-close" class="icon-btn" aria-label="关闭收录说明">×</button></div><div id="radar-about-content" class="radar-dialog-content"></div></dialog>
+</body></html>

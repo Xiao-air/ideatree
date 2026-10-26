@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light">
+  <title>IdeaTree · 周实验安排</title>
+  <link rel="icon" href="/assets/ideatree-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/workspace-tabs.css"><link rel="stylesheet" href="/schedule.css">
+  <script src="/vendor/lucide.min.js" defer></script><script src="/schedule.js" type="module"></script>
+</head>
+<body>
+<a class="skip-link" href="#planner-main">跳转到周实验安排</a>
+<div class="planner-shell">
+  <aside class="planner-sidebar" aria-label="实验安排导航">
+    <a class="brand" href="/" aria-label="IdeaTree 首页"><img src="/assets/ideatree-icon.svg" width="34" height="34" alt=""><span>idea<span class="brand-light">tree</span><small>研究灵感工作台</small></span></a>
+    <nav class="workspace-tabs" aria-label="工作页面"><a href="/">生长时间轴</a><a href="/radar.html">Radar备选库</a><a href="/schedule.html" aria-current="page">周实验安排</a></nav>
+    <div class="planner-agenda-heading">本周安排<span id="agenda-count">0</span></div>
+    <div id="week-agenda" class="week-agenda"></div>
+    <div class="planner-sidebar-footer"><p>框选一段时间，提前安排实验。<br>点击卡片可查看和修改内容。</p><div class="backup-buttons"><button id="schedule-import" class="quiet-btn"><i data-lucide="upload"></i>导入安排</button><button id="schedule-export" class="quiet-btn"><i data-lucide="download"></i>导出安排</button></div><div id="schedule-save-state" role="status" aria-live="polite">保存在本机</div></div>
+  </aside>
+  <main id="planner-main" class="planner-main">
+    <header class="topbar"><div><div class="eyebrow">WEEKLY LAB PLANNER</div><h1>周实验安排</h1></div><button id="new-plan" class="btn primary"><i data-lucide="plus"></i><span>新建安排</span></button></header>
+    <div class="planner-toolbar"><div class="week-controls"><button id="previous-week" class="icon-btn" aria-label="前一周"><i data-lucide="chevron-left"></i></button><button id="next-week" class="icon-btn" aria-label="后一周"><i data-lucide="chevron-right"></i></button><button id="this-week" class="btn week-today">本周</button><h2 id="week-label"></h2></div><label class="week-picker"><span>跳转日期</span><input id="week-date" type="date" aria-label="跳转到日期所在周"></label></div>
+    <section class="weekly-work" aria-label="本周待安排工作">
+      <div class="weekly-work-heading"><button id="toggle-week-work" class="weekly-work-toggle" aria-expanded="true" aria-controls="week-work-body"><i data-lucide="clipboard-list"></i><span>本周工作清单</span><span id="week-work-count" class="week-work-count">0 项待安排</span><i data-lucide="chevron-up" class="work-chevron"></i></button><button id="new-week-work" class="quiet-btn"><i data-lucide="plus"></i>记录工作</button></div>
+      <div id="week-work-body"><div id="week-work-list" class="week-work-list"></div></div>
+    </section>
+    <div id="planner-notice" class="planner-notice" role="alert" hidden></div>
+    <div id="calendar-scroll" class="calendar-scroll" aria-label="星期时间表，可上下滚动查看全天">
+      <div id="calendar-header" class="calendar-header"></div>
+      <div id="time-grid" class="time-grid"><div id="time-ruler" class="time-ruler" aria-hidden="true"></div></div>
+    </div>
+    <footer class="planner-footer"><span id="week-summary">本周尚无安排</span><span>拖拽框选 · 15 分钟刻度 · 点击卡片编辑</span></footer>
+  </main>
+</div>
+<dialog id="plan-editor" aria-labelledby="plan-editor-title"><form id="plan-form"><div class="dialog-heading"><div><div class="eyebrow">EXPERIMENT PLAN</div><h2 id="plan-editor-title">新建实验安排</h2></div><button type="button" id="close-plan" class="icon-btn" aria-label="关闭编辑窗口"><i data-lucide="x"></i></button></div>
+  <div class="editor-fields"><label>实验 / 工作名称<input id="plan-title" name="title" maxlength="100" required placeholder="例如：水凝胶制备与细胞接种"></label>
+    <label id="work-week-label" hidden>所属周（选择该周任意一天）<input id="work-week" name="week" type="date" required disabled></label>
+    <div id="plan-date-fields" class="form-row"><label>日期<input id="plan-date" name="date" type="date" required></label><label id="plan-until-label">结束日期<input id="plan-until" type="date" required></label></div>
+    <p id="plan-range-help" class="field-help">跨多天选择时，每天在同一时段创建一张卡片。</p>
+    <div id="plan-time-fields" class="form-row"><label>开始时间<select id="plan-start" name="start" required></select></label><label>结束时间<select id="plan-end" name="end" required></select></label></div>
+    <label>实验内容<textarea id="plan-note" name="note" maxlength="4000" rows="5" placeholder="写下实验步骤、待准备的材料或需要注意的条件。"></textarea></label>
+    <fieldset class="plan-color-field"><legend>卡片颜色</legend><div id="plan-colors" class="plan-colors"></div></fieldset>
+  </div><p id="plan-error" class="form-error" role="alert" hidden></p>
+  <div class="dialog-footer"><button id="delete-plan" type="button" class="btn danger" hidden>删除安排</button><button id="cancel-plan" type="button" class="btn">取消</button><button id="save-plan" class="btn primary" type="submit">保存安排</button></div>
+</form></dialog>
+<input id="schedule-file" type="file" accept=".json,application/json" hidden>
+<div id="planner-toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body></html>
